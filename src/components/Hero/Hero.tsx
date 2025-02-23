@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import ProfileImage from '../ui/ProfileImage';
 
 interface HeroProps {
   className?: string;
@@ -48,17 +49,18 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
             </motion.div>
           </div>
 
-          {/* Right Column - Image/Visual Content */}
+          {/* Right Column - Profile Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="hidden lg:flex items-center justify-center"
+            className="hidden lg:block"
           >
-            {/* Placeholder for profile image or visual element */}
-            <div className="relative w-full max-w-lg aspect-square rounded-full bg-gradient-to-br from-primary-500 to-primary-600 opacity-90 dark:opacity-80">
-              {/* Add profile image here later */}
-            </div>
+            <ProfileImage
+              src="/profile-placeholder.jpg"
+              alt="Your Name - Software Engineer"
+              className="w-full max-w-lg mx-auto aspect-square"
+            />
           </motion.div>
         </div>
       </div>
