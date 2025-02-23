@@ -1,34 +1,12 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import Hero from '../components/Hero';
 
 const Home = () => {
   return (
     <div className="space-y-20">
       {/* Hero Section */}
-      <section className="text-center py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
-        >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">
-            Software Engineer & Developer
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Building innovative solutions with modern technologies. Passionate about creating
-            efficient, scalable, and user-friendly applications.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <Link to="/projects" className="btn">
-              View Projects
-            </Link>
-            <Link to="/contact" className="btn-outline">
-              Contact Me
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+      <Hero />
 
       {/* Skills Section */}
       <section className="py-20">
