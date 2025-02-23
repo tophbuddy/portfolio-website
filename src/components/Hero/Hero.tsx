@@ -1,12 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import ProfileImage from '../ui/ProfileImage';
+import { ProfileImage, AnimatedText } from '../ui';
 
 interface HeroProps {
   className?: string;
 }
 
 const Hero: React.FC<HeroProps> = ({ className = '' }) => {
+  const introWords = [
+    'Software Engineer',
+    'Full Stack Developer',
+    'UI/UX Enthusiast',
+    'Problem Solver',
+    'Tech Innovator'
+  ];
+
   return (
     <header className={`relative min-h-[90vh] w-full ${className}`}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800" />
@@ -22,9 +30,15 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
               className="space-y-4"
             >
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white">
-                Software Engineer
-                <span className="block text-primary-600 dark:text-primary-400">
-                  & Developer
+                <AnimatedText 
+                  words={introWords}
+                  className="text-primary-600 dark:text-primary-400"
+                  typingSpeed={100}
+                  deletingSpeed={50}
+                  delayBetweenWords={2000}
+                />
+                <span className="block mt-2">
+                  Building the Future
                 </span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0">
