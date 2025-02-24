@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ProfileImage, AnimatedText, CTAButton } from '../ui';
+import { ProfileImage, AnimatedText, CTAButton, TextReveal } from '../ui';
 import { FaArrowRight, FaEnvelope } from 'react-icons/fa';
 
 interface HeroProps {
@@ -24,12 +24,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[90vh]">
           {/* Left Column - Text Content */}
           <div className="space-y-8 text-center lg:text-left">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-4"
-            >
+            <div className="space-y-4">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white">
                 <AnimatedText 
                   words={introWords}
@@ -38,21 +33,30 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                   deletingSpeed={50}
                   delayBetweenWords={2000}
                 />
-                <span className="block mt-2">
+                <TextReveal 
+                  delay={0.5}
+                  direction="up"
+                  type="words"
+                  className="block mt-2"
+                >
                   Building the Future
-                </span>
+                </TextReveal>
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0">
+              <TextReveal
+                delay={0.7}
+                direction="up"
+                type="lines"
+                className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0"
+              >
                 Building innovative solutions with modern technologies. Passionate about
                 creating efficient, scalable, and user-friendly applications.
-              </p>
-            </motion.div>
+              </TextReveal>
+            </div>
 
             {/* CTA Buttons Container */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+            <TextReveal
+              delay={0.9}
+              direction="up"
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
               <CTAButton
@@ -71,7 +75,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
               >
                 Contact Me
               </CTAButton>
-            </motion.div>
+            </TextReveal>
           </div>
 
           {/* Right Column - Profile Image */}
@@ -99,7 +103,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ 
           duration: 0.5,
-          delay: 0.5,
+          delay: 1.2,
           y: {
             duration: 1.5,
             repeat: Infinity,
