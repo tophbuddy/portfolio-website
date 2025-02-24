@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import ButtonHoverEffect from './ButtonHoverEffect';
 
 interface CTAButtonProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ interface CTAButtonProps {
   iconPosition?: 'left' | 'right';
   isLoading?: boolean;
   disabled?: boolean;
+  hoverEffect?: 'shine' | 'glow' | 'magnetic' | 'spotlight';
 }
 
 const CTAButton: React.FC<CTAButtonProps> = ({
@@ -28,6 +30,7 @@ const CTAButton: React.FC<CTAButtonProps> = ({
   iconPosition = 'right',
   isLoading = false,
   disabled = false,
+  hoverEffect = 'glow',
 }) => {
   // Base styles
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-60 disabled:cursor-not-allowed';
@@ -70,6 +73,38 @@ const CTAButton: React.FC<CTAButtonProps> = ({
     </svg>
   );
 
+  // Get hover effect based on variant
+  const getHoverEffect = () => {
+    switch (variant) {
+      case 'primary':
+        return {
+          effect: hoverEffect,
+          glowColor: 'rgba(var(--color-primary-500), 0.4)',
+          intensity: 1.2,
+        };
+      case 'secondary':
+        return {
+          effect: hoverEffect,
+          glowColor: 'rgba(var(--color-gray-500), 0.3)',
+          intensity: 1,
+        };
+      case 'outline':
+        return {
+          effect: hoverEffect,
+          glowColor: 'rgba(var(--color-primary-400), 0.2)',
+          intensity: 0.8,
+        };
+      default:
+        return {
+          effect: hoverEffect,
+          glowColor: 'rgba(var(--color-primary-500), 0.3)',
+          intensity: 1,
+        };
+    }
+  };
+
+  const { effect, glowColor, intensity } = getHoverEffect();
+
   // Button content with icon
   const ButtonContent = () => (
     <>
@@ -84,23 +119,16 @@ const CTAButton: React.FC<CTAButtonProps> = ({
     </>
   );
 
-  // Hover animation variants
-  const buttonVariants = {
-    initial: { scale: 1 },
-    hover: { scale: 1.02 },
-    tap: { scale: 0.98 },
-  };
-
   const buttonClasses = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`;
 
   // Render appropriate element based on props
   if (to) {
     return (
-      <motion.div
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        variants={buttonVariants}
+      <ButtonHoverEffect
+        effect={effect}
+        glowColor={glowColor}
+        intensity={intensity}
+        disabled={disabled || isLoading}
       >
         <Link
           to={to}
@@ -109,17 +137,17 @@ const CTAButton: React.FC<CTAButtonProps> = ({
         >
           <ButtonContent />
         </Link>
-      </motion.div>
+      </ButtonHoverEffect>
     );
   }
 
   if (href) {
     return (
-      <motion.div
-        initial="initial"
-        whileHover="hover"
-        whileTap="tap"
-        variants={buttonVariants}
+      <ButtonHoverEffect
+        effect={effect}
+        glowColor={glowColor}
+        intensity={intensity}
+        disabled={disabled || isLoading}
       >
         <a
           href={href}
@@ -130,22 +158,25 @@ const CTAButton: React.FC<CTAButtonProps> = ({
         >
           <ButtonContent />
         </a>
-      </motion.div>
+      </ButtonHoverEffect>
     );
   }
 
   return (
-    <motion.button
-      initial="initial"
-      whileHover="hover"
-      whileTap="tap"
-      variants={buttonVariants}
-      className={buttonClasses}
-      onClick={onClick}
+    <ButtonHoverEffect
+      effect={effect}
+      glowColor={glowColor}
+      intensity={intensity}
       disabled={disabled || isLoading}
     >
-      <ButtonContent />
-    </motion.button>
+      <button
+        className={buttonClasses}
+        onClick={onClick}
+        disabled={disabled || isLoading}
+      >
+        <ButtonContent />
+      </button>
+    </ButtonHoverEffect>
   );
 };
 
