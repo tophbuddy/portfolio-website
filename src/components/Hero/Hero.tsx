@@ -16,7 +16,10 @@ interface HeroProps {
 /**
  * Hero component that displays the main landing section of the portfolio.
  * Features animated text, profile image, and call-to-action buttons.
- * Implements a mobile-first responsive design approach.
+ * Implements responsive design with optimized breakpoints:
+ * - Mobile: < 640px (default)
+ * - Tablet: 640px - 1024px
+ * - Desktop: > 1024px
  * 
  * @component
  * @example
@@ -46,50 +49,56 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
       <div className="relative h-full">
         {/* Main content container with responsive padding */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex flex-col h-full justify-center items-center lg:items-start py-8 lg:py-0">
-            {/* Mobile profile image - shown only on small screens */}
-            <ScrollReveal
-              threshold={0.3}
-              delay={0.2}
-              variants={{
-                hidden: { opacity: 0, scale: 0.9 },
-                visible: {
-                  opacity: 1,
-                  scale: 1,
-                  transition: {
-                    duration: 0.8,
-                    ease: [0.2, 0.65, 0.3, 0.9],
-                  },
-                },
-              }}
-              className="block lg:hidden mb-8 w-48 h-48 sm:w-56 sm:h-56"
-            >
-              <ProfileImage
-                src="/profile-placeholder.jpg"
-                alt="Your Name - Software Engineer"
-                className="rounded-full shadow-xl"
-              />
-            </ScrollReveal>
-
-            {/* Text content - full width on mobile, half width on desktop */}
-            <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+          {/* Flex container with responsive layout */}
+          <div className="flex flex-col lg:flex-row h-full items-center justify-center lg:justify-between py-8 lg:py-0 gap-8 lg:gap-12">
+            {/* Left content column */}
+            <div className="w-full lg:w-1/2 max-w-2xl lg:max-w-none order-2 lg:order-1">
+              {/* Mobile/Tablet profile image */}
               <ScrollReveal
                 threshold={0.3}
+                delay={0.2}
                 variants={{
-                  hidden: { opacity: 0, y: 30 },
+                  hidden: { opacity: 0, scale: 0.9 },
                   visible: {
                     opacity: 1,
-                    y: 0,
+                    scale: 1,
                     transition: {
                       duration: 0.8,
                       ease: [0.2, 0.65, 0.3, 0.9],
                     },
                   },
                 }}
+                className="block lg:hidden mb-8 mx-auto"
               >
-                <div className="space-y-4">
-                  {/* Responsive typography */}
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white">
+                <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64">
+                  <ProfileImage
+                    src="/profile-placeholder.jpg"
+                    alt="Your Name - Software Engineer"
+                    className="rounded-full shadow-xl"
+                  />
+                  {/* Decorative background circle */}
+                  <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-full animate-spin-slow" />
+                </div>
+              </ScrollReveal>
+
+              {/* Text content */}
+              <div className="text-center lg:text-left space-y-6 md:space-y-8">
+                <ScrollReveal
+                  threshold={0.3}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        duration: 0.8,
+                        ease: [0.2, 0.65, 0.3, 0.9],
+                      },
+                    },
+                  }}
+                >
+                  {/* Heading with responsive typography */}
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 dark:text-white tracking-tight">
                     <AnimatedText 
                       words={introWords}
                       className="text-primary-600 dark:text-primary-400"
@@ -101,75 +110,85 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                       delay={0.5}
                       direction="up"
                       type="words"
-                      className="block mt-2"
+                      className="block mt-2 md:mt-4"
                     >
                       Building the Future
                     </TextReveal>
                   </h1>
+
+                  {/* Description text */}
                   <TextReveal
                     delay={0.7}
                     direction="up"
                     type="lines"
-                    className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0"
+                    className="mt-6 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0"
                   >
                     Building innovative solutions with modern technologies. Passionate about
                     creating efficient, scalable, and user-friendly applications.
                   </TextReveal>
-                </div>
 
-                {/* CTA Buttons - Stack on mobile, side by side on larger screens */}
-                <TextReveal
-                  delay={0.9}
-                  direction="up"
-                  className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8"
-                >
-                  <CTAButton
-                    to="/projects"
-                    variant="primary"
-                    size="lg"
-                    icon={<FaArrowRight />}
-                    hoverEffect="glow"
-                    className="w-full sm:w-auto"
-                  >
-                    View Projects
-                  </CTAButton>
-                  <CTAButton
-                    to="/contact"
-                    variant="outline"
-                    size="lg"
-                    icon={<FaEnvelope />}
-                    hoverEffect="shine"
-                    className="w-full sm:w-auto"
-                  >
-                    Contact Me
-                  </CTAButton>
-                </TextReveal>
-              </ScrollReveal>
+                  {/* CTA Buttons */}
+                  <div className="mt-8 md:mt-12">
+                    <TextReveal
+                      delay={0.9}
+                      direction="up"
+                      className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center lg:justify-start"
+                    >
+                      <CTAButton
+                        to="/projects"
+                        variant="primary"
+                        size="lg"
+                        icon={<FaArrowRight />}
+                        hoverEffect="glow"
+                        className="w-full sm:w-auto text-base md:text-lg"
+                      >
+                        View Projects
+                      </CTAButton>
+                      <CTAButton
+                        to="/contact"
+                        variant="outline"
+                        size="lg"
+                        icon={<FaEnvelope />}
+                        hoverEffect="shine"
+                        className="w-full sm:w-auto text-base md:text-lg"
+                      >
+                        Contact Me
+                      </CTAButton>
+                    </TextReveal>
+                  </div>
+                </ScrollReveal>
+              </div>
             </div>
 
-            {/* Desktop profile image - hidden on mobile */}
-            <ScrollReveal
-              threshold={0.3}
-              delay={0.2}
-              variants={{
-                hidden: { opacity: 0, scale: 0.9 },
-                visible: {
-                  opacity: 1,
-                  scale: 1,
-                  transition: {
-                    duration: 0.8,
-                    ease: [0.2, 0.65, 0.3, 0.9],
+            {/* Desktop profile image column */}
+            <div className="hidden lg:block w-5/12 xl:w-4/12 order-1 lg:order-2">
+              <ScrollReveal
+                threshold={0.3}
+                delay={0.2}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: {
+                    opacity: 1,
+                    scale: 1,
+                    transition: {
+                      duration: 0.8,
+                      ease: [0.2, 0.65, 0.3, 0.9],
+                    },
                   },
-                },
-              }}
-              className="hidden lg:block lg:absolute lg:right-8 lg:top-1/2 lg:-translate-y-1/2 lg:w-5/12 xl:w-4/12"
-            >
-              <ProfileImage
-                src="/profile-placeholder.jpg"
-                alt="Your Name - Software Engineer"
-                className="w-full rounded-2xl shadow-2xl"
-              />
-            </ScrollReveal>
+                }}
+              >
+                <div className="relative">
+                  <ProfileImage
+                    src="/profile-placeholder.jpg"
+                    alt="Your Name - Software Engineer"
+                    className="w-full rounded-2xl shadow-2xl"
+                  />
+                  {/* Decorative elements for desktop */}
+                  <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-2xl -z-10 transform rotate-3" />
+                  <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-2xl -z-20 transform -rotate-3" />
+                </div>
+              </ScrollReveal>
+            </div>
           </div>
         </div>
       </div>
@@ -177,7 +196,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
       {/* Decorative gradient overlay */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
       
-      {/* Scroll Indicator - Hidden on mobile */}
+      {/* Scroll Indicator - Visible on tablet and up */}
       <ScrollReveal
         threshold={0.1}
         delay={1}
