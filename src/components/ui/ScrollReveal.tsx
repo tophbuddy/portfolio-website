@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, useInView, useAnimation, type Variant } from 'framer-motion';
+import { motion, useInView, useAnimation, type Transition, type TargetAndTransition } from 'framer-motion';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -7,8 +7,8 @@ interface ScrollRevealProps {
   className?: string;
   /** Animation variants for different states (hidden, visible) */
   variants?: {
-    hidden: Variant;
-    visible: Variant;
+    hidden: TargetAndTransition;
+    visible: TargetAndTransition;
   };
   /** Viewport threshold for triggering animation (0 to 1) */
   threshold?: number;
@@ -97,6 +97,12 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     handleViewportEntry();
   }, [isInView]);
 
+  // Define transition with delay
+  const transition: Transition = {
+    delay,
+    ...(variants.visible.transition as Transition || {}),
+  };
+
   return (
     <motion.div
       ref={ref}
@@ -104,10 +110,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       animate={controls}
       variants={variants}
       className={className}
-      transition={{
-        delay,
-        ...variants.visible?.transition,
-      }}
+      transition={transition}
     >
       {children}
     </motion.div>
