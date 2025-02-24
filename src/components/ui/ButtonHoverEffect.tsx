@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 interface ButtonHoverEffectProps {
   children: React.ReactNode;
