@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ProfileImage, AnimatedText } from '../ui';
+import { ProfileImage, AnimatedText, CTAButton } from '../ui';
+import { FaArrowRight, FaEnvelope } from 'react-icons/fa';
 
 interface HeroProps {
   className?: string;
@@ -54,12 +55,22 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
-              <button className="btn">
+              <CTAButton
+                to="/projects"
+                variant="primary"
+                size="lg"
+                icon={<FaArrowRight />}
+              >
                 View Projects
-              </button>
-              <button className="btn-outline">
+              </CTAButton>
+              <CTAButton
+                to="/contact"
+                variant="outline"
+                size="lg"
+                icon={<FaEnvelope />}
+              >
                 Contact Me
-              </button>
+              </CTAButton>
             </motion.div>
           </div>
 
