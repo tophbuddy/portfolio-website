@@ -1,88 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
+import OptimizedImage from './OptimizedImage';
 
 interface ProfileImageProps {
+  /** Source URL for the profile image */
   src: string;
+  /** Alternative text for accessibility */
   alt: string;
+  /** Additional CSS classes */
   className?: string;
 }
 
-const ProfileImage: React.FC<ProfileImageProps> = ({ src, alt, className = '' }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-
-  useEffect(() => {
-    // Create an observer for lazy loading
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      {
-        root: null,
-        rootMargin: '50px',
-        threshold: 0.1,
-      }
-    );
-
-    // Get the container element
-    const container = document.getElementById('profile-image-container');
-    if (container) {
-      observer.observe(container);
-    }
-
-    return () => {
-      if (container) {
-        observer.unobserve(container);
-      }
-    };
-  }, []);
-
-  // Preload the image
-  useEffect(() => {
-    if (isInView) {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => setIsLoaded(true);
-    }
-  }, [isInView, src]);
+/**
+ * ProfileImage component that displays an optimized profile image with proper responsive sizing.
+ * Uses modern image optimization techniques for optimal performance.
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * <ProfileImage
+ *   src="/images/profile.jpg"
+ *   alt="John Doe - Software Engineer"
+ *   className="rounded-full"
+ * />
+ * ```
+ */
+const ProfileImage: React.FC<ProfileImageProps> = ({
+  src,
+  alt,
+  className = '',
+}) => {
+  // Generate responsive sizes based on viewport
+  const sizes = `
+    (min-width: 1536px) 384px,
+    (min-width: 1280px) 320px,
+    (min-width: 1024px) 256px,
+    (min-width: 768px) 192px,
+    (min-width: 640px) 160px,
+    128px
+  `.trim();
 
   return (
-    <div
-      id="profile-image-container"
-      className={`relative overflow-hidden ${className}`}
-    >
-      {/* Placeholder/Skeleton */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse rounded-full" />
-
-      {/* Actual image */}
-      {isInView && (
-        <motion.img
-          src={src}
-          alt={alt}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{
-            opacity: isLoaded ? 1 : 0,
-            scale: isLoaded ? 1 : 0.9,
-          }}
-          transition={{
-            opacity: { duration: 0.5 },
-            scale: { duration: 0.7, ease: 'easeOut' },
-          }}
-          className="relative w-full h-full object-cover rounded-full"
-          style={{ opacity: isLoaded ? 1 : 0 }}
-        />
-      )}
-
-      {/* Decorative elements */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary-500/20 to-transparent pointer-events-none" />
-      
-      {/* Loading indicator */}
-      {!isLoaded && isInView && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-    </div>
+    <OptimizedImage
+      src={src}
+      alt={alt}
+      className={className}
+      sizes={sizes}
+      priority // Profile image is usually above the fold
+      objectFit="cover"
+      blurDataUrl="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRseHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/2wBDAR4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=" // Placeholder blur
+    />
   );
 };
 

@@ -26,11 +26,6 @@ interface HeroProps {
  * ```tsx
  * <Hero className="my-custom-class" />
  * ```
- * 
- * @param props - Component props
- * @param props.className - Optional CSS classes to apply to the container
- * 
- * @returns The Hero section component with responsive layout and animations
  */
 const Hero: React.FC<HeroProps> = ({ className = '' }) => {
   const introWords = [
@@ -42,9 +37,12 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
   ];
 
   return (
-    <header className={`relative min-h-screen w-full ${className}`}>
-      {/* Background gradient with responsive padding */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800" />
+    <header className={`relative min-h-[100svh] w-full ${className}`}>
+      {/* Background with gradient and pattern */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800" />
+        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-[0.015] dark:opacity-[0.03]" />
+      </div>
       
       <div className="relative h-full">
         {/* Main content container with responsive padding */}
@@ -72,9 +70,9 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
               >
                 <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64">
                   <ProfileImage
-                    src="/profile-placeholder.jpg"
+                    src="/images/profile.jpg"
                     alt="Your Name - Software Engineer"
-                    className="rounded-full shadow-xl"
+                    className="rounded-full shadow-xl ring-2 ring-primary-100 dark:ring-primary-900"
                   />
                   {/* Decorative background circle */}
                   <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-full animate-spin-slow" />
@@ -101,7 +99,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 dark:text-white tracking-tight">
                     <AnimatedText 
                       words={introWords}
-                      className="text-primary-600 dark:text-primary-400"
+                      className="text-primary-600 dark:text-primary-400 font-extrabold"
                       typingSpeed={100}
                       deletingSpeed={50}
                       delayBetweenWords={2000}
@@ -110,7 +108,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                       delay={0.5}
                       direction="up"
                       type="words"
-                      className="block mt-2 md:mt-4"
+                      className="block mt-2 md:mt-4 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent"
                     >
                       Building the Future
                     </TextReveal>
@@ -121,7 +119,7 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                     delay={0.7}
                     direction="up"
                     type="lines"
-                    className="mt-6 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0"
+                    className="mt-6 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed"
                   >
                     Building innovative solutions with modern technologies. Passionate about
                     creating efficient, scalable, and user-friendly applications.
@@ -138,9 +136,9 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                         to="/projects"
                         variant="primary"
                         size="lg"
-                        icon={<FaArrowRight />}
+                        icon={<FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />}
                         hoverEffect="glow"
-                        className="w-full sm:w-auto text-base md:text-lg"
+                        className="w-full sm:w-auto text-base md:text-lg font-medium"
                       >
                         View Projects
                       </CTAButton>
@@ -148,9 +146,9 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
                         to="/contact"
                         variant="outline"
                         size="lg"
-                        icon={<FaEnvelope />}
+                        icon={<FaEnvelope className="ml-2 group-hover:scale-110 transition-transform" />}
                         hoverEffect="shine"
-                        className="w-full sm:w-auto text-base md:text-lg"
+                        className="w-full sm:w-auto text-base md:text-lg font-medium"
                       >
                         Contact Me
                       </CTAButton>
@@ -179,13 +177,15 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
               >
                 <div className="relative">
                   <ProfileImage
-                    src="/profile-placeholder.jpg"
+                    src="/images/profile.jpg"
                     alt="Your Name - Software Engineer"
-                    className="w-full rounded-2xl shadow-2xl"
+                    className="w-full rounded-2xl shadow-2xl ring-4 ring-primary-100 dark:ring-primary-900"
                   />
                   {/* Decorative elements for desktop */}
                   <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-2xl -z-10 transform rotate-3" />
                   <div className="absolute -inset-4 border-2 border-primary-200 dark:border-primary-800 rounded-2xl -z-20 transform -rotate-3" />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary-500/20 to-transparent pointer-events-none" />
                 </div>
               </ScrollReveal>
             </div>
@@ -219,8 +219,8 @@ const Hero: React.FC<HeroProps> = ({ className = '' }) => {
         once={false}
         className="hidden md:block absolute bottom-8 left-1/2 transform -translate-x-1/2"
       >
-        <div className="w-6 h-10 border-2 border-gray-600 dark:border-gray-400 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-gray-600 dark:bg-gray-400 rounded-full mt-2" />
+        <div className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-400 dark:bg-gray-600 rounded-full mt-2 animate-bounce" />
         </div>
       </ScrollReveal>
     </header>
