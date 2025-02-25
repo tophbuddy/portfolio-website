@@ -149,7 +149,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
 
               {/* Other skills */}
               <MasonryGrid
-                items={filteredSkills.filter((skill) => !skill.featured)}
+                skills={filteredSkills.filter((skill) => !skill.featured)}
                 columns={{ default: 1, sm: 2, lg: 3 }}
                 className="gap-4"
               />
