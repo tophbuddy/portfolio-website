@@ -5,3 +5,4 @@ export { default as TextReveal } from './TextReveal';
 export { default as ButtonHoverEffect } from './ButtonHoverEffect';
 export { default as ScrollReveal } from './ScrollReveal';
 export { default as OptimizedImage } from './OptimizedImage';
+export { default as Tag } from './Tag';
