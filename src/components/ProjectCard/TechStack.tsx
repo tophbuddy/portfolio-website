@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Tag } from '../ui';
+import type { TagProps } from '../ui/Tag';
 import { Technology } from '../../types/Project';
 
 interface TechStackProps {
