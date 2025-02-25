@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import { Skill } from '../../types/Skill';
 import { getSkillIcon } from '../../data/skillIcons';
 import { getSkillLevelProgress, formatYearsOfExperience } from '../../data/skillLevels';
@@ -28,21 +29,29 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
   showLevel = true,
   animateOnScroll = true,
 }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const iconInfo = getSkillIcon(skill.id);
   const progress = getSkillLevelProgress(skill.level);
-  const Icon = iconInfo?.icon;
+
+  // Animation variants
+  const variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
     <motion.div
-      className={`flex flex-col space-y-2 ${className}`}
-      initial={animateOnScroll ? { opacity: 0, y: 20 } : false}
-      whileInView={animateOnScroll ? { opacity: 1, y: 0 } : false}
-      viewport={{ once: true }}
+      ref={ref}
+      variants={variants}
+      initial={animateOnScroll ? 'hidden' : 'visible'}
+      animate={animateOnScroll ? (isInView ? 'visible' : 'hidden') : 'visible'}
       transition={{ duration: 0.5 }}
+      className={`flex flex-col space-y-2 ${className}`}
     >
       {/* Skill header with icon and name */}
       <div className="flex items-center space-x-3">
-        {Icon && (
+        {iconInfo?.icon && (
           <div
             className="w-6 h-6 flex items-center justify-center rounded"
             style={{
@@ -50,7 +59,7 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
               backgroundColor: iconInfo.background?.light,
             }}
           >
-            <Icon className="w-4 h-4" />
+            <iconInfo.icon className="w-4 h-4" />
           </div>
         )}
         <span className="font-medium text-gray-900 dark:text-gray-100">
