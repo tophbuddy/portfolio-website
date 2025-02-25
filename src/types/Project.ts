@@ -10,6 +10,10 @@ export interface Technology {
   url?: string;
   /** Optional color for the technology tag */
   color?: string;
+  /** Optional type of technology (e.g., "framework", "language", "database") */
+  type?: 'framework' | 'language' | 'database' | 'tool' | 'platform' | 'other';
+  /** Optional description for tooltips */
+  description?: string;
 }
 
 /**
