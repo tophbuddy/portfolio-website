@@ -83,8 +83,8 @@ const InteractiveIconGrid: React.FC<InteractiveIconGridProps> = ({
     return skills.filter(s => 
       s.id !== skill.id && 
       (s.categoryId === skill.categoryId || 
-       s.relatedSkillIds?.includes(skill.id) ||
-       skill.relatedSkillIds?.includes(s.id))
+       s.relatedSkills?.includes(skill.id) ||
+       skill.relatedSkills?.includes(s.id))
     );
   };
 
@@ -208,35 +208,45 @@ const InteractiveIconGrid: React.FC<InteractiveIconGridProps> = ({
                   }}
                 />
 
-                {/* Icon */}
-                <Icon
-                  className={`
-                    w-8 h-8 md:w-10 md:h-10
-                    transition-all duration-300
-                    ${isHovered ? 'scale-110' : ''}
-                  `}
-                  style={{
-                    color: iconInfo.color.light,
-                  }}
-                />
+                {/* Icon and Tooltip */}
+                {showTooltips ? (
+                  <Tooltip
+                    content={
+                      <div className="text-center">
+                        <div className="font-medium">{skill.name}</div>
+                        {skill.level && (
+                          <div className="text-sm text-gray-300">{skill.level}</div>
+                        )}
+                      </div>
+                    }
+                    position="top"
+                    delay={200}
+                    maxWidth="200px"
+                  >
+                    <Icon
+                      className={`
+                        w-8 h-8 md:w-10 md:h-10
+                        transition-all duration-300
+                        ${isHovered ? 'scale-110' : ''}
+                      `}
+                      style={{
+                        color: iconInfo.color.light,
+                      }}
+                    />
+                  </Tooltip>
+                ) : (
+                  <Icon
+                    className={`
+                      w-8 h-8 md:w-10 md:h-10
+                      transition-all duration-300
+                      ${isHovered ? 'scale-110' : ''}
+                    `}
+                    style={{
+                      color: iconInfo.color.light,
+                    }}
+                  />
+                )}
               </div>
-
-              {/* Tooltip */}
-              {showTooltips && (
-                <Tooltip
-                  content={
-                    <div className="text-center">
-                      <div className="font-medium">{skill.name}</div>
-                      {skill.level && (
-                        <div className="text-sm text-gray-300">{skill.level}</div>
-                      )}
-                    </div>
-                  }
-                  position="top"
-                  delay={200}
-                  maxWidth="200px"
-                />
-              )}
             </motion.div>
           );
         })}

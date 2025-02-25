@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import InteractiveIconGrid from '../InteractiveIconGrid';
 import { Skill } from '../../../types/Skill';
+import { getSkillIcon } from '../../../data/skillIcons';
 
 // Mock dependencies
 vi.mock('framer-motion', () => ({
@@ -15,13 +16,13 @@ vi.mock('framer-motion', () => ({
 }));
 
 vi.mock('../../../data/skillIcons', () => ({
-  getSkillIcon: (id: string) => ({
+  getSkillIcon: vi.fn((id: string) => ({
     icon: () => <div data-testid={`icon-${id}`}>Icon</div>,
     color: {
       light: '#000000',
       dark: '#FFFFFF',
     },
-  }),
+  })),
 }));
 
 vi.mock('../../ui/Tooltip', () => ({
@@ -43,7 +44,7 @@ describe('InteractiveIconGrid', () => {
       level: 'advanced',
       yearsOfExperience: 3,
       featured: true,
-      relatedSkillIds: ['typescript'],
+      relatedSkills: ['typescript'],
     },
     {
       id: 'typescript',
@@ -53,7 +54,7 @@ describe('InteractiveIconGrid', () => {
       level: 'expert',
       yearsOfExperience: 4,
       featured: true,
-      relatedSkillIds: ['react'],
+      relatedSkills: ['react'],
     },
   ];
 
@@ -172,7 +173,9 @@ describe('InteractiveIconGrid', () => {
   });
 
   it('handles missing icons gracefully', () => {
-    vi.mocked(getSkillIcon).mockReturnValueOnce(undefined);
+    const mockGetSkillIcon = vi.mocked(getSkillIcon, true);
+    mockGetSkillIcon.mockReturnValueOnce(undefined);
+    
     render(<InteractiveIconGrid skills={mockSkills} />);
     
     expect(screen.queryByTestId('icon-react')).not.toBeInTheDocument();

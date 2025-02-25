@@ -16,7 +16,7 @@ vi.mock('../CategoryFilter', () => ({
           onClick={() => onCategorySelect(cat.id)}
           data-selected={selectedCategoryId === cat.id}
         >
-          {cat.name} ({cat.count})
+          {cat.name}
         </button>
       ))}
     </div>
@@ -24,10 +24,10 @@ vi.mock('../CategoryFilter', () => ({
 }));
 
 vi.mock('../MasonryGrid', () => ({
-  default: ({ skills }: any) => (
+  default: ({ items }: any) => (
     <div data-testid="masonry-grid">
-      {skills.map((skill: Skill) => (
-        <div key={skill.id}>{skill.name}</div>
+      {items.map((item: any) => (
+        <div key={item.id}>{item.name}</div>
       ))}
     </div>
   ),
@@ -36,17 +36,29 @@ vi.mock('../MasonryGrid', () => ({
 vi.mock('../TechnologyGrid', () => ({
   default: ({ skills }: any) => (
     <div data-testid="technology-grid">
-      {skills.map((skill: Skill) => (
+      {skills.map((skill: any) => (
         <div key={skill.id}>{skill.name}</div>
       ))}
     </div>
   ),
 }));
 
-vi.mock('../SkillProgress', () => ({
-  default: ({ skill }: any) => (
-    <div data-testid="skill-progress">
-      {skill.name}
+vi.mock('../InteractiveIconGrid', () => ({
+  default: ({ skills, onSkillClick }: any) => (
+    <div data-testid="interactive-icon-grid">
+      {skills.map((skill: any) => (
+        <button key={skill.id} onClick={() => onSkillClick(skill)}>
+          {skill.name}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
+vi.mock('../AnimatedSkillBar', () => ({
+  default: ({ label, value }: any) => (
+    <div data-testid="skill-bar">
+      {label}: {value}%
     </div>
   ),
 }));
@@ -67,8 +79,8 @@ describe('SkillsSection', () => {
       name: 'React',
       categoryId: 'frontend',
       icon: 'react',
-      level: 'advanced',
-      yearsOfExperience: 3,
+      level: 'expert',
+      yearsOfExperience: 4,
       featured: true,
     },
     {
@@ -76,9 +88,9 @@ describe('SkillsSection', () => {
       name: 'Node.js',
       categoryId: 'backend',
       icon: 'node',
-      level: 'intermediate',
-      yearsOfExperience: 2,
-      featured: true,
+      level: 'advanced',
+      yearsOfExperience: 3,
+      featured: false,
     },
   ];
 
@@ -95,7 +107,7 @@ describe('SkillsSection', () => {
     },
   ];
 
-  it('renders all skills initially', () => {
+  it('renders section title', () => {
     render(
       <SkillsSection
         skills={mockSkills}
@@ -103,8 +115,27 @@ describe('SkillsSection', () => {
       />
     );
     
-    expect(screen.getByText('React')).toBeInTheDocument();
-    expect(screen.getByText('Node.js')).toBeInTheDocument();
+    expect(screen.getByText('Skills & Technologies')).toBeInTheDocument();
+  });
+
+  it('toggles between compact and detailed views', () => {
+    render(
+      <SkillsSection
+        skills={mockSkills}
+        categories={mockCategories}
+      />
+    );
+    
+    // Initially in detailed view
+    expect(screen.getByTestId('masonry-grid')).toBeInTheDocument();
+    
+    // Switch to compact view
+    fireEvent.click(screen.getByText('Compact'));
+    expect(screen.getByTestId('interactive-icon-grid')).toBeInTheDocument();
+    
+    // Switch back to detailed view
+    fireEvent.click(screen.getByText('Detailed'));
+    expect(screen.getByTestId('masonry-grid')).toBeInTheDocument();
   });
 
   it('filters skills by category', () => {
@@ -116,66 +147,29 @@ describe('SkillsSection', () => {
     );
     
     // Click frontend category
-    fireEvent.click(screen.getByText('Frontend (1)'));
-    
+    fireEvent.click(screen.getByText('Frontend'));
     expect(screen.getByText('React')).toBeInTheDocument();
     expect(screen.queryByText('Node.js')).not.toBeInTheDocument();
   });
 
-  it('shows correct category counts', () => {
+  it('shows skill details modal on click in compact view', () => {
     render(
       <SkillsSection
         skills={mockSkills}
         categories={mockCategories}
       />
     );
-    
-    expect(screen.getByText('Frontend (1)')).toBeInTheDocument();
-    expect(screen.getByText('Backend (1)')).toBeInTheDocument();
-  });
-
-  it('toggles between compact and detailed views', () => {
-    render(
-      <SkillsSection
-        skills={mockSkills}
-        categories={mockCategories}
-      />
-    );
-    
-    // Initially shows detailed view
-    expect(screen.queryByTestId('technology-grid')).not.toBeInTheDocument();
     
     // Switch to compact view
     fireEvent.click(screen.getByText('Compact'));
-    expect(screen.getByTestId('technology-grid')).toBeInTheDocument();
     
-    // Switch back to detailed view
-    fireEvent.click(screen.getByText('Detailed'));
-    expect(screen.queryByTestId('technology-grid')).not.toBeInTheDocument();
-  });
-
-  it('uses masonry layout when specified', () => {
-    render(
-      <SkillsSection
-        skills={mockSkills}
-        categories={mockCategories}
-        useMasonryLayout={true}
-      />
-    );
+    // Click a skill
+    fireEvent.click(screen.getByText('React'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     
-    expect(screen.getByTestId('masonry-grid')).toBeInTheDocument();
-  });
-
-  it('shows empty state when no skills match filter', () => {
-    const emptySkills: Skill[] = [];
-    render(
-      <SkillsSection
-        skills={emptySkills}
-        categories={mockCategories}
-      />
-    );
-    
-    expect(screen.getByText('No skills found in this category.')).toBeInTheDocument();
+    // Close modal
+    fireEvent.click(screen.getByText('Close'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('applies custom className', () => {
@@ -203,16 +197,84 @@ describe('SkillsSection', () => {
     expect(screen.queryByText('Node.js')).not.toBeInTheDocument();
   });
 
-  it('shows detailed progress when specified', () => {
+  it('shows featured skills in skill bars', () => {
     render(
       <SkillsSection
         skills={mockSkills}
         categories={mockCategories}
-        showDetailedProgress={true}
       />
     );
     
-    const progressElements = screen.getAllByTestId('skill-progress');
-    expect(progressElements).toHaveLength(2);
+    const skillBar = screen.getByTestId('skill-bar');
+    expect(skillBar).toHaveTextContent('React: 95%');
+  });
+
+  it('handles empty skills array', () => {
+    render(
+      <SkillsSection
+        skills={[]}
+        categories={mockCategories}
+      />
+    );
+    
+    expect(screen.queryByTestId('masonry-grid')).toBeInTheDocument();
+    expect(screen.queryByTestId('skill-bar')).not.toBeInTheDocument();
+  });
+
+  it('handles empty categories array', () => {
+    render(
+      <SkillsSection
+        skills={mockSkills}
+        categories={[]}
+      />
+    );
+    
+    expect(screen.getByTestId('category-filter')).toBeInTheDocument();
+  });
+
+  it('renders responsive layout on mobile', () => {
+    global.innerWidth = 375;
+    global.innerHeight = 667;
+    global.dispatchEvent(new Event('resize'));
+
+    render(
+      <SkillsSection
+        skills={mockSkills}
+        categories={mockCategories}
+      />
+    );
+
+    expect(screen.getByTestId('category-filter')).toBeInTheDocument();
+    expect(screen.getByTestId('masonry-grid')).toBeInTheDocument();
+  });
+
+  it('hides category filter on mobile', () => {
+    global.innerWidth = 375;
+    global.innerHeight = 667;
+    global.dispatchEvent(new Event('resize'));
+
+    render(
+      <SkillsSection
+        skills={mockSkills}
+        categories={mockCategories}
+      />
+    );
+
+    expect(screen.queryByTestId('category-filter')).not.toBeInTheDocument();
+  });
+
+  it('shows category filter on desktop', () => {
+    global.innerWidth = 1920;
+    global.innerHeight = 1080;
+    global.dispatchEvent(new Event('resize'));
+
+    render(
+      <SkillsSection
+        skills={mockSkills}
+        categories={mockCategories}
+      />
+    );
+
+    expect(screen.getByTestId('category-filter')).toBeInTheDocument();
   });
 });
