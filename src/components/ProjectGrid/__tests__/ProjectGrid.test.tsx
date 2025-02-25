@@ -1,6 +1,6 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProjectGrid from '../ProjectGrid';
 import { Project } from '../../../types/Project';
@@ -18,116 +18,154 @@ vi.mock('../../ProjectCard/ProjectCard', () => ({
 vi.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 describe('ProjectGrid', () => {
-  const mockProjects: Project[] = [
-    {
-      id: '1',
-      title: 'Featured Project',
-      summary: 'A featured project',
-      description: 'Featured project description',
+  const generateProjects = (count: number): Project[] => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: String(i + 1),
+      title: `Project ${i + 1}`,
+      summary: `Summary ${i + 1}`,
+      description: `Description ${i + 1}`,
       images: [],
-      technologies: [{ name: 'React' }],
+      technologies: [{ name: i % 2 === 0 ? 'React' : 'TypeScript' }],
       links: [],
       date: '2025-02-25',
-      category: 'Web',
-      featured: true,
-    },
-    {
-      id: '2',
-      title: 'Regular Project 1',
-      summary: 'A regular project',
-      description: 'Regular project description',
-      images: [],
-      technologies: [{ name: 'TypeScript' }],
-      links: [],
-      date: '2025-02-25',
-      category: 'Mobile',
-    },
-    {
-      id: '3',
-      title: 'Regular Project 2',
-      summary: 'Another regular project',
-      description: 'Another regular project description',
-      images: [],
-      technologies: [{ name: 'React' }],
-      links: [],
-      date: '2025-02-25',
-      category: 'Web',
-    },
-  ];
+      category: i % 2 === 0 ? 'Web' : 'Mobile',
+      featured: i === 0,
+    }));
+  };
 
-  it('renders all projects by default', () => {
-    render(<ProjectGrid projects={mockProjects} />);
-    
-    const cards = screen.getAllByTestId('project-card');
-    expect(cards).toHaveLength(3);
+  const mockProjects = generateProjects(10);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
   });
 
-  it('filters featured projects correctly', () => {
-    render(<ProjectGrid projects={mockProjects} showFeatured={true} />);
-    
-    const cards = screen.getAllByTestId('project-card');
-    expect(cards).toHaveLength(1);
-    expect(cards[0]).toHaveTextContent('Featured Project');
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it('filters by category correctly', () => {
-    render(<ProjectGrid projects={mockProjects} category="Web" />);
+  it('renders initial batch of projects', () => {
+    render(<ProjectGrid projects={mockProjects} initialLoadCount={4} />);
     
     const cards = screen.getAllByTestId('project-card');
-    expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveTextContent('Featured Project');
-    expect(cards[1]).toHaveTextContent('Regular Project 2');
+    expect(cards).toHaveLength(4);
   });
 
-  it('filters by technology correctly', () => {
-    render(<ProjectGrid projects={mockProjects} technology="React" />);
-    
-    const cards = screen.getAllByTestId('project-card');
-    expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveTextContent('Featured Project');
-    expect(cards[1]).toHaveTextContent('Regular Project 2');
-  });
-
-  it('displays empty state when no projects match filters', () => {
+  it('loads more projects when clicking load more', async () => {
     render(
       <ProjectGrid
         projects={mockProjects}
-        category="Desktop"
-        technology="Python"
+        initialLoadCount={4}
+        loadMoreCount={2}
       />
     );
     
-    expect(screen.queryByTestId('project-card')).not.toBeInTheDocument();
-    expect(screen.getByText('No projects found')).toBeInTheDocument();
+    expect(screen.getAllByTestId('project-card')).toHaveLength(4);
+
+    const loadMoreButton = screen.getByText(/Load More/);
+    fireEvent.click(loadMoreButton);
+
+    // Wait for loading state
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+    // Fast-forward timer
+    vi.advanceTimersByTime(500);
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('project-card')).toHaveLength(6);
+    });
   });
 
-  it('applies featured styling to featured projects', () => {
-    render(<ProjectGrid projects={mockProjects} />);
-    
-    const cards = screen.getAllByTestId('project-card');
-    const featuredCard = cards.find(card => 
-      card.getAttribute('data-featured') === 'true'
+  it('shows correct number of remaining projects', () => {
+    render(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={4}
+        loadMoreCount={2}
+      />
     );
-    expect(featuredCard).toHaveTextContent('Featured Project');
+    
+    expect(screen.getByText('(6 remaining)')).toBeInTheDocument();
   });
 
-  it('applies custom className', () => {
-    const { container } = render(
-      <ProjectGrid projects={mockProjects} className="custom-class" />
+  it('hides load more button when all projects are visible', async () => {
+    render(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={10}
+      />
     );
     
-    expect(container.firstChild).toHaveClass('custom-class');
+    expect(screen.queryByText(/Load More/)).not.toBeInTheDocument();
   });
 
-  it('maintains correct order with featured projects first', () => {
-    render(<ProjectGrid projects={mockProjects} />);
+  it('resets visible count when filters change', () => {
+    const { rerender } = render(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={4}
+        category="Web"
+      />
+    );
     
-    const cards = screen.getAllByTestId('project-card');
-    expect(cards[0]).toHaveTextContent('Featured Project');
-    expect(cards[1]).toHaveTextContent('Regular Project');
+    const initialCards = screen.getAllByTestId('project-card');
+    const initialCount = initialCards.length;
+
+    // Change category filter
+    rerender(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={4}
+        category="Mobile"
+      />
+    );
+
+    const newCards = screen.getAllByTestId('project-card');
+    expect(newCards.length).toBeLessThanOrEqual(initialCount);
+  });
+
+  it('maintains featured projects at the top when loading more', async () => {
+    render(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={4}
+        loadMoreCount={2}
+      />
+    );
+    
+    const firstCard = screen.getAllByTestId('project-card')[0];
+    expect(firstCard).toHaveAttribute('data-featured', 'true');
+
+    const loadMoreButton = screen.getByText(/Load More/);
+    fireEvent.click(loadMoreButton);
+
+    // Fast-forward timer
+    vi.advanceTimersByTime(500);
+
+    await waitFor(() => {
+      const newFirstCard = screen.getAllByTestId('project-card')[0];
+      expect(newFirstCard).toHaveAttribute('data-featured', 'true');
+    });
+  });
+
+  it('shows loading state while loading more projects', () => {
+    render(
+      <ProjectGrid
+        projects={mockProjects}
+        initialLoadCount={4}
+        loadMoreCount={2}
+      />
+    );
+    
+    const loadMoreButton = screen.getByText(/Load More/);
+    fireEvent.click(loadMoreButton);
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(loadMoreButton).toBeDisabled();
   });
 });

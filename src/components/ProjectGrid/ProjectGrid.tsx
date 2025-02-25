@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Project } from '../../types/Project';
 import ProjectCard from '../ProjectCard/ProjectCard';
 
@@ -12,21 +12,36 @@ interface ProjectGridProps {
   category?: string;
   /** Optional technology filter */
   technology?: string;
+  /** Number of projects to load initially */
+  initialLoadCount?: number;
+  /** Number of projects to load per batch */
+  loadMoreCount?: number;
   /** Optional CSS classes */
   className?: string;
 }
 
 /**
  * ProjectGrid component displays projects in a responsive grid layout
- * with filtering capabilities and smooth animations.
+ * with filtering capabilities, load more functionality, and smooth animations.
  */
 const ProjectGrid: React.FC<ProjectGridProps> = ({
   projects,
   showFeatured = false,
   category,
   technology,
+  initialLoadCount = 6,
+  loadMoreCount = 6,
   className = '',
 }) => {
+  // State for visible project count
+  const [visibleCount, setVisibleCount] = useState(initialLoadCount);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(initialLoadCount);
+  }, [showFeatured, category, technology, initialLoadCount]);
+
   // Filter projects based on props
   const filteredProjects = projects.filter(project => {
     if (showFeatured && !project.featured) return false;
@@ -36,6 +51,25 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
     }
     return true;
   });
+
+  // Split into featured and regular projects
+  const featuredProjects = filteredProjects.filter(project => project.featured);
+  const regularProjects = filteredProjects.filter(project => !project.featured);
+
+  // Determine visible projects
+  const visibleProjects = [
+    ...featuredProjects,
+    ...regularProjects.slice(0, visibleCount - featuredProjects.length),
+  ];
+
+  // Handle load more
+  const handleLoadMore = async () => {
+    setIsLoading(true);
+    // Simulate network delay for smooth animation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setVisibleCount(prev => prev + loadMoreCount);
+    setIsLoading(false);
+  };
 
   // Animation variants
   const containerVariants = {
@@ -48,42 +82,47 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
     },
   };
 
-  return (
-    <motion.div
-      className={`
-        grid grid-cols-1 gap-6
-        sm:grid-cols-2
-        lg:grid-cols-3
-        xl:grid-cols-4
-        ${className}
-      `}
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      role="grid"
-      aria-label="Project grid"
-    >
-      {/* Featured projects - shown first and span 2 columns */}
-      {filteredProjects
-        .filter(project => project.featured)
-        .map(project => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            featured={true}
-            className="sm:col-span-2 lg:col-span-3 xl:col-span-2"
-          />
-        ))}
+  const buttonVariants = {
+    hover: { scale: 1.05 },
+    tap: { scale: 0.95 },
+  };
 
-      {/* Regular projects */}
-      {filteredProjects
-        .filter(project => !project.featured)
-        .map(project => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-          />
-        ))}
+  return (
+    <div className={className}>
+      <motion.div
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        role="grid"
+        aria-label="Project grid"
+      >
+        <AnimatePresence mode="wait">
+          {visibleProjects.map((project, index) => (
+            <motion.div
+              key={project.id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{
+                duration: 0.3,
+                delay: index * 0.1,
+              }}
+              className={
+                project.featured
+                  ? 'sm:col-span-2 lg:col-span-3 xl:col-span-2'
+                  : ''
+              }
+            >
+              <ProjectCard
+                project={project}
+                featured={project.featured}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Empty state */}
       {filteredProjects.length === 0 && (
@@ -120,7 +159,66 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
           </p>
         </motion.div>
       )}
-    </motion.div>
+
+      {/* Load more button */}
+      {visibleProjects.length < filteredProjects.length && (
+        <motion.div
+          className="flex justify-center mt-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <motion.button
+            onClick={handleLoadMore}
+            disabled={isLoading}
+            className={`
+              px-6 py-3 rounded-lg
+              bg-primary-500 hover:bg-primary-600
+              text-white font-medium
+              transition-colors duration-200
+              focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+              disabled:opacity-50 disabled:cursor-not-allowed
+              flex items-center gap-2
+            `}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
+          >
+            {isLoading ? (
+              <>
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Loading...
+              </>
+            ) : (
+              <>
+                Load More
+                <span className="text-sm opacity-75">
+                  ({filteredProjects.length - visibleProjects.length} remaining)
+                </span>
+              </>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
+    </div>
   );
 };
 
