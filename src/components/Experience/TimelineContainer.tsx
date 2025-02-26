@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExperienceEntry } from '../../types/Experience';
 import { ExperienceCategory } from '../../types/ExperienceCategory';
-import { filterExperiencesByCategory, getSortedCategories, getCategoryMetadata } from '../../utils/categoryUtils';
+import { filterExperiencesByCategory, getSortedCategories } from '../../utils/categoryUtils';
+import FilterBar from './FilterBar';
 
 interface TimelineContainerProps {
   /** List of experience entries to display */
@@ -62,48 +63,11 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
     <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
       {/* Category Filters */}
       {showFilters && (
-        <div className="mb-8">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Filter by Category
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {getSortedCategories().map(category => {
-              const metadata = getCategoryMetadata(category);
-              const isActive = activeCategories.includes(category);
-
-              return (
-                <button
-                  key={category}
-                  onClick={() => toggleCategory(category)}
-                  className={`
-                    inline-flex items-center px-3 py-1.5 rounded-full text-sm
-                    font-medium transition-colors duration-200
-                    ${
-                      isActive
-                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                    }
-                  `}
-                  style={{
-                    backgroundColor: isActive ? metadata.color : undefined,
-                  }}
-                >
-                  <span className="relative flex h-2 w-2 mr-2">
-                    <span className={`
-                      animate-ping absolute inline-flex h-full w-full rounded-full opacity-75
-                      ${isActive ? 'bg-white dark:bg-gray-900' : 'bg-transparent'}
-                    `} />
-                    <span className={`
-                      relative inline-flex rounded-full h-2 w-2
-                      ${isActive ? 'bg-white dark:bg-gray-900' : 'bg-gray-400 dark:bg-gray-600'}
-                    `} />
-                  </span>
-                  {metadata.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <FilterBar
+          activeCategories={activeCategories}
+          onToggleCategory={toggleCategory}
+          className="mb-8"
+        />
       )}
 
       {/* Timeline Content */}
