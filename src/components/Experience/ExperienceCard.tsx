@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ExperienceEntry } from '../../types/Experience';
 import { getCategoryMetadata } from '../../utils/categoryUtils';
 import { formatDateRange, calculateDuration } from '../../utils/dateFormatting';
+import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 
 interface ExperienceCardProps {
   /** Experience entry to display */
@@ -27,6 +28,12 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   onClick,
   className = '',
 }) => {
+  const { ref, style } = useScrollAnimation({
+    direction: position === 'left' ? 'left' : 'right',
+    threshold: 0.2,
+    distance: 30,
+  });
+
   const categoryMetadata = experience.category 
     ? getCategoryMetadata(experience.category)
     : null;
@@ -52,6 +59,8 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
 
   return (
     <motion.div
+      ref={ref}
+      style={style}
       variants={cardVariants}
       className={`
         relative w-full md:w-[calc(50%-2rem)] ${position === 'right' ? 'md:ml-auto' : ''}
