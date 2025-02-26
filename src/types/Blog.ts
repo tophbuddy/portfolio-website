@@ -61,16 +61,76 @@ export interface BlogPostMeta {
 }
 
 /**
- * Blog post content section interface
+ * Base interface for blog post sections
  */
-export interface BlogPostSection {
+interface BaseBlogPostSection {
   id: string;
-  type: 'text' | 'code' | 'image' | 'quote' | 'list' | 'heading';
-  content: string;
-  language?: string; // for code blocks
-  caption?: string; // for images
-  level?: number; // for headings
 }
+
+/**
+ * Text section
+ */
+interface TextSection extends BaseBlogPostSection {
+  type: 'text';
+  content: string;
+}
+
+/**
+ * Code section
+ */
+interface CodeSection extends BaseBlogPostSection {
+  type: 'code';
+  content: string;
+  language: string;
+}
+
+/**
+ * Image section
+ */
+interface ImageSection extends BaseBlogPostSection {
+  type: 'image';
+  content: string; // URL
+  caption?: string;
+  alt: string;
+}
+
+/**
+ * Quote section
+ */
+interface QuoteSection extends BaseBlogPostSection {
+  type: 'quote';
+  content: string;
+  author?: string;
+}
+
+/**
+ * List section
+ */
+interface ListSection extends BaseBlogPostSection {
+  type: 'list';
+  content: string[];
+  ordered?: boolean;
+}
+
+/**
+ * Heading section
+ */
+interface HeadingSection extends BaseBlogPostSection {
+  type: 'heading';
+  content: string;
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+/**
+ * Union type for all blog post sections
+ */
+export type BlogPostSection =
+  | TextSection
+  | CodeSection
+  | ImageSection
+  | QuoteSection
+  | ListSection
+  | HeadingSection;
 
 /**
  * Complete blog post interface

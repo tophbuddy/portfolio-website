@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import {
   isValidSlug,
   isValidDate,
@@ -8,7 +9,7 @@ import {
   validateBlogPostMeta,
   validateBlogPost,
 } from '../blogValidation';
-import { BlogCategory, BlogPostStatus, BlogPost, BlogPostMeta } from '../../types/Blog';
+import { BlogCategory, BlogPostStatus, type BlogPost, type BlogPostMeta, type BlogPostSection } from '../../types/Blog';
 
 describe('Blog Validation Utils', () => {
   describe('isValidSlug', () => {
@@ -119,6 +120,12 @@ describe('Blog Validation Utils', () => {
   });
 
   describe('validateBlogPost', () => {
+    const textSection: BlogPostSection = {
+      id: '1',
+      type: 'text',
+      content: 'Test content',
+    };
+
     const validPost: BlogPost = {
       title: 'Test Post',
       slug: 'test-post',
@@ -129,13 +136,7 @@ describe('Blog Validation Utils', () => {
       tags: [{ id: '1', name: 'Test', slug: 'test' }],
       readingTime: 5,
       status: BlogPostStatus.PUBLISHED,
-      content: [
-        {
-          id: '1',
-          type: 'text',
-          content: 'Test content',
-        },
-      ],
+      content: [textSection],
     };
 
     it('accepts valid blog post', () => {
@@ -143,16 +144,16 @@ describe('Blog Validation Utils', () => {
     });
 
     it('validates content sections', () => {
+      const codeSection: BlogPostSection = {
+        id: '1',
+        type: 'code',
+        content: 'const test = true;',
+        language: '', // empty language
+      };
+
       const postWithInvalidContent = {
         ...validPost,
-        content: [
-          {
-            id: '1',
-            type: 'code',
-            content: 'const test = true;',
-            // missing language
-          },
-        ],
+        content: [codeSection],
       };
       const errors = validateBlogPost(postWithInvalidContent);
       expect(errors).toContain('Code section 0 is missing a language');

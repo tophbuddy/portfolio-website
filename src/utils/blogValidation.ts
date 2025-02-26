@@ -126,13 +126,26 @@ export function validateBlogPost(post: BlogPost): string[] {
     // Type-specific validation
     switch (section.type) {
       case 'code':
-        if (!section.language) {
+        if (!section.language || section.language.trim() === '') {
           errors.push(`Code section ${index} is missing a language`);
+        }
+        break;
+      case 'image':
+        if (!section.alt) {
+          errors.push(`Image section ${index} is missing alt text`);
+        }
+        if (!isValidUrl(section.content)) {
+          errors.push(`Image section ${index} has invalid URL`);
+        }
+        break;
+      case 'list':
+        if (!Array.isArray(section.content)) {
+          errors.push(`List section ${index} content must be an array`);
         }
         break;
       case 'heading':
         if (!section.level || section.level < 1 || section.level > 6) {
-          errors.push(`Heading section ${index} has an invalid level`);
+          errors.push(`Heading section ${index} has invalid level`);
         }
         break;
     }
