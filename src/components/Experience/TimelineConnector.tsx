@@ -105,11 +105,10 @@ const TimelineConnector: React.FC<TimelineConnectorProps> = ({
           <div
             className={`
               w-3 h-3 rounded-full
-              ${active ? 'ring-4 ring-opacity-30' : ''}
+              ${active ? `ring-4 ring-opacity-30 ring-[${lineColor}]` : ''}
             `}
             style={{
               backgroundColor: lineColor,
-              ringColor: lineColor,
             }}
           />
         </motion.div>
@@ -120,11 +119,10 @@ const TimelineConnector: React.FC<TimelineConnectorProps> = ({
           <div
             className={`
               w-3 h-3 rounded-full
-              ${active ? 'ring-4 ring-opacity-30' : ''}
+              ${active ? `ring-4 ring-opacity-30 ring-[${lineColor}]` : ''}
             `}
             style={{
               backgroundColor: lineColor,
-              ringColor: lineColor,
             }}
           />
         </motion.div>
