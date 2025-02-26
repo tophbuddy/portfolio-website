@@ -17,6 +17,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@types/jsdom": "^21.1.7",
     "date-fns": "^2.30.0",
+    "feed": "^4.2.2",
     "framer-motion": "^10.16.4",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
