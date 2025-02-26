@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExperienceEntry } from '../../types/Experience';
 import { ExperienceCategory } from '../../types/ExperienceCategory';
 import { filterExperiencesByCategory, getSortedCategories } from '../../utils/categoryUtils';
 import FilterBar from './FilterBar';
+import ExperienceCard from './ExperienceCard';
+import TimelineConnector from './TimelineConnector';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 interface TimelineContainerProps {
   /** List of experience entries to display */
@@ -26,7 +29,7 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
   showFilters = true,
   animate = true,
 }) => {
-  // State for active category filters
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [activeCategories, setActiveCategories] = useState<ExperienceCategory[]>(
     getSortedCategories()
   );
@@ -41,7 +44,6 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
   const toggleCategory = (category: ExperienceCategory) => {
     setActiveCategories(prev => {
       if (prev.includes(category)) {
-        // Don't allow deselecting if it's the last category
         if (prev.length === 1) return prev;
         return prev.filter(c => c !== category);
       }
@@ -66,7 +68,7 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
         <FilterBar
           activeCategories={activeCategories}
           onToggleCategory={toggleCategory}
-          className="mb-8"
+          className="mb-8 sticky top-0 z-10 backdrop-blur-sm bg-white/80 dark:bg-gray-800/80"
         />
       )}
 
@@ -77,28 +79,47 @@ const TimelineContainer: React.FC<TimelineContainerProps> = ({
         animate={animate ? 'visible' : undefined}
         className="relative"
       >
-        {/* Timeline Line */}
+        {/* Timeline Line - Hidden on mobile */}
         <div
-          className="absolute left-0 top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700"
-          style={{ left: '50%' }}
+          className={`
+            absolute left-0 w-px bg-gray-200 dark:bg-gray-700
+            ${isMobile ? 'left-4' : 'left-1/2'}
+            top-0 bottom-0
+          `}
         />
 
         {/* Timeline Entries */}
         <AnimatePresence mode="wait">
           <div className="relative space-y-8">
-            {filteredExperiences.map(experience => (
-              <motion.div
-                key={experience.id}
-                initial={animate ? { opacity: 0, y: 20 } : undefined}
-                animate={animate ? { opacity: 1, y: 0 } : undefined}
-                exit={animate ? { opacity: 0, y: -20 } : undefined}
-                transition={{ duration: 0.3 }}
-                className="relative"
-              >
-                {/* Entry content will be rendered by child components */}
-                {experience.company} - {experience.title}
-              </motion.div>
-            ))}
+            {filteredExperiences.map((experience, index) => {
+              const position = isMobile ? 'right' : index % 2 === 0 ? 'left' : 'right';
+              const isLast = index === filteredExperiences.length - 1;
+
+              return (
+                <div key={experience.id} className="relative">
+                  {/* Experience Card */}
+                  <ExperienceCard
+                    experience={experience}
+                    position={position}
+                    className={`
+                      ${isMobile ? 'ml-8' : ''}
+                      ${position === 'right' ? 'md:ml-[calc(50%+2rem)]' : 'md:mr-[calc(50%+2rem)]'}
+                    `}
+                  />
+
+                  {/* Timeline Connector */}
+                  {!isLast && (
+                    <TimelineConnector
+                      position={position}
+                      active={experience.endDate === 'Present'}
+                      className={`
+                        ${isMobile ? 'left-4' : position === 'left' ? 'right-1/2' : 'left-1/2'}
+                      `}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </AnimatePresence>
 
