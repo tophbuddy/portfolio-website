@@ -1,13 +1,15 @@
-import React from 'react';
+import { type ReactElement } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExperienceCategory } from '../../types/ExperienceCategory';
 import { getCategoryMetadata } from '../../utils/categoryUtils';
 
 interface FilterBarProps {
-  /** Currently active categories */
-  activeCategories: ExperienceCategory[];
-  /** Callback when a category is toggled */
-  onToggleCategory: (category: ExperienceCategory) => void;
+  /** List of available categories */
+  categories: ExperienceCategory[];
+  /** Currently selected category */
+  selectedCategory: ExperienceCategory | null;
+  /** Callback when a category is selected */
+  onFilter: (category: ExperienceCategory | null) => void;
   /** Optional className for styling */
   className?: string;
 }
@@ -15,13 +17,12 @@ interface FilterBarProps {
 /**
  * Component for filtering experiences by category
  */
-const FilterBar: React.FC<FilterBarProps> = ({
-  activeCategories,
-  onToggleCategory,
+export default function FilterBar({
+  categories,
+  selectedCategory,
+  onFilter,
   className = '',
-}) => {
-  const allCategories = Object.values(ExperienceCategory);
-
+}: FilterBarProps): ReactElement {
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -40,85 +41,53 @@ const FilterBar: React.FC<FilterBarProps> = ({
     visible: { opacity: 1, scale: 1 },
   };
 
+  const handleClick = (category: ExperienceCategory) => {
+    if (selectedCategory === category) {
+      onFilter(null);
+    } else {
+      onFilter(category);
+    }
+  };
+
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className={`
-        bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4
-        ${className}
-      `}
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 ${className}`}
     >
-      <div className="flex flex-col space-y-4">
-        {/* Title */}
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          Filter by Experience Type
-        </h3>
+      <div className="flex flex-wrap gap-2">
+        <AnimatePresence>
+          {categories.map((category) => {
+            const metadata = getCategoryMetadata(category);
+            const isSelected = selectedCategory === category;
 
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-2">
-          <AnimatePresence mode="wait">
-            {allCategories.map((category) => {
-              const metadata = getCategoryMetadata(category);
-              const isActive = activeCategories.includes(category);
-              const isDisabled = activeCategories.length === 1 && isActive;
-
-              return (
-                <motion.button
-                  key={category}
-                  variants={itemVariants}
-                  onClick={() => !isDisabled && onToggleCategory(category)}
-                  disabled={isDisabled}
-                  className={`
-                    inline-flex items-center px-3 py-1.5 rounded-full text-sm
-                    font-medium transition-all duration-200
-                    ${
-                      isActive
-                        ? 'ring-2 ring-offset-2 dark:ring-offset-gray-800'
-                        : 'opacity-70 hover:opacity-100'
-                    }
-                    ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-                  `}
-                  style={{
-                    backgroundColor: isActive ? metadata.color : `${metadata.color}20`,
-                    color: isActive ? '#ffffff' : metadata.color,
-                    ringColor: metadata.color,
-                  }}
-                >
-                  {/* Icon */}
-                  <span className="mr-1.5">{metadata.icon}</span>
-
-                  {/* Label */}
-                  <span>{metadata.label}</span>
-
-                  {/* Count Badge */}
-                  {isActive && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="ml-2 bg-white bg-opacity-20 px-1.5 py-0.5 rounded-full text-xs"
-                    >
-                      Active
-                    </motion.span>
+            return (
+              <motion.button
+                key={category}
+                variants={itemVariants}
+                onClick={() => handleClick(category)}
+                className={`
+                  px-4 py-2 rounded-lg font-medium transition-all duration-normal
+                  ${isSelected
+                    ? 'bg-primary-600 text-white hover:bg-primary-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }
+                `}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-sm">{metadata.label}</span>
+                  {metadata.icon && (
+                    <span className="w-4 h-4" style={{ color: metadata.color }}>
+                      {metadata.icon}
+                    </span>
                   )}
-                </motion.button>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-
-        {/* Active Filters Summary */}
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {activeCategories.length === allCategories.length ? (
-            'Showing all experience types'
-          ) : (
-            `Showing ${activeCategories.length} of ${allCategories.length} types`
-          )}
-        </div>
+                </span>
+              </motion.button>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
-};
-
-export default FilterBar;
+}

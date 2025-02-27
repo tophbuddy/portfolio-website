@@ -1,96 +1,74 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FilterBar from '../FilterBar';
 import { ExperienceCategory } from '../../../types/ExperienceCategory';
 
+const mockCategories = [
+  ExperienceCategory.FULL_TIME,
+  ExperienceCategory.CONTRACT,
+  ExperienceCategory.INTERNSHIP,
+];
+
 describe('FilterBar', () => {
-  const mockToggleCategory = jest.fn();
+  const mockOnFilter = jest.fn();
 
   beforeEach(() => {
-    mockToggleCategory.mockClear();
+    mockOnFilter.mockClear();
   });
 
   it('renders all category buttons', () => {
     render(
       <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME]}
-        onToggleCategory={mockToggleCategory}
+        categories={mockCategories}
+        selectedCategory={null}
+        onFilter={mockOnFilter}
       />
     );
 
-    // Check for all category labels
-    expect(screen.getByText('Full-time')).toBeInTheDocument();
-    expect(screen.getByText('Contract')).toBeInTheDocument();
-    expect(screen.getByText('Freelance')).toBeInTheDocument();
+    mockCategories.forEach(category => {
+      expect(screen.getByRole('button', { name: new RegExp(category, 'i') })).toBeInTheDocument();
+    });
   });
 
-  it('shows active state for selected categories', () => {
+  it('highlights selected category', () => {
     render(
       <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME]}
-        onToggleCategory={mockToggleCategory}
+        categories={mockCategories}
+        selectedCategory={ExperienceCategory.FULL_TIME}
+        onFilter={mockOnFilter}
       />
     );
 
-    const activeButton = screen.getByText('Full-time');
-    expect(activeButton).toHaveTextContent('Active');
+    const selectedButton = screen.getByRole('button', { name: /full.time/i });
+    expect(selectedButton).toHaveClass('bg-primary-600');
   });
 
-  it('disables button when its the last active category', () => {
+  it('calls onFilter with selected category', () => {
     render(
       <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME]}
-        onToggleCategory={mockToggleCategory}
+        categories={mockCategories}
+        selectedCategory={null}
+        onFilter={mockOnFilter}
       />
     );
 
-    const button = screen.getByText('Full-time');
-    expect(button).toBeDisabled();
+    const button = screen.getByRole('button', { name: /contract/i });
+    fireEvent.click(button);
+
+    expect(mockOnFilter).toHaveBeenCalledWith(ExperienceCategory.CONTRACT);
   });
 
-  it('calls onToggleCategory when a category is clicked', () => {
+  it('calls onFilter with null when selected category is clicked again', () => {
     render(
       <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME, ExperienceCategory.CONTRACT]}
-        onToggleCategory={mockToggleCategory}
+        categories={mockCategories}
+        selectedCategory={ExperienceCategory.FULL_TIME}
+        onFilter={mockOnFilter}
       />
     );
 
-    fireEvent.click(screen.getByText('Contract'));
-    expect(mockToggleCategory).toHaveBeenCalledWith(ExperienceCategory.CONTRACT);
-  });
+    const button = screen.getByRole('button', { name: /full.time/i });
+    fireEvent.click(button);
 
-  it('shows correct summary text when all categories are active', () => {
-    render(
-      <FilterBar
-        activeCategories={Object.values(ExperienceCategory)}
-        onToggleCategory={mockToggleCategory}
-      />
-    );
-
-    expect(screen.getByText('Showing all experience types')).toBeInTheDocument();
-  });
-
-  it('shows correct summary text when some categories are active', () => {
-    render(
-      <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME]}
-        onToggleCategory={mockToggleCategory}
-      />
-    );
-
-    expect(screen.getByText('Showing 1 of 3 types')).toBeInTheDocument();
-  });
-
-  it('applies custom className', () => {
-    const { container } = render(
-      <FilterBar
-        activeCategories={[ExperienceCategory.FULL_TIME]}
-        onToggleCategory={mockToggleCategory}
-        className="custom-class"
-      />
-    );
-
-    expect(container.firstChild).toHaveClass('custom-class');
+    expect(mockOnFilter).toHaveBeenCalledWith(null);
   });
 });

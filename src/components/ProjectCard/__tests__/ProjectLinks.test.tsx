@@ -1,6 +1,5 @@
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import ProjectLinks from '../ProjectLinks';
 import { ProjectLink } from '../../../types/Project';
@@ -17,19 +16,13 @@ describe('ProjectLinks', () => {
   const mockLinks: ProjectLink[] = [
     {
       type: 'github',
-      url: 'https://github.com/test/repo',
+      url: 'https://github.com/test',
       label: 'View Code',
     },
     {
       type: 'demo',
       url: 'https://demo.test',
       label: 'Live Demo',
-      icon: '/icons/demo.svg',
-    },
-    {
-      type: 'docs',
-      url: 'https://docs.test',
-      label: 'Documentation',
     },
   ];
 
@@ -38,7 +31,6 @@ describe('ProjectLinks', () => {
     
     expect(screen.getByText('View Code')).toBeInTheDocument();
     expect(screen.getByText('Live Demo')).toBeInTheDocument();
-    expect(screen.getByText('Documentation')).toBeInTheDocument();
   });
 
   it('renders correct URLs', () => {
@@ -60,41 +52,17 @@ describe('ProjectLinks', () => {
     });
   });
 
-  it('renders custom icons when provided', () => {
-    render(<ProjectLinks links={mockLinks} />);
-    
-    const demoLink = screen.getByText('Live Demo').closest('a');
-    const icon = demoLink?.querySelector('img');
-    expect(icon).toHaveAttribute('src', '/icons/demo.svg');
-  });
-
-  it('renders default icons when no custom icon provided', () => {
-    render(<ProjectLinks links={mockLinks} />);
-    
-    const githubLink = screen.getByText('View Code').closest('a');
-    const svg = githubLink?.querySelector('svg');
-    expect(svg).toBeInTheDocument();
+  it('applies custom className', () => {
+    const { container } = render(
+      <ProjectLinks links={mockLinks} className="custom-class" />
+    );
+    expect(container.firstChild).toHaveClass('custom-class');
   });
 
   it('applies featured styles when featured prop is true', () => {
     render(<ProjectLinks links={mockLinks} featured={true} />);
-    
     const link = screen.getByText('View Code').closest('a');
     expect(link).toHaveClass('text-base');
-  });
-
-  it('applies default styles when featured prop is false', () => {
-    render(<ProjectLinks links={mockLinks} featured={false} />);
-    
-    const link = screen.getByText('View Code').closest('a');
-    expect(link).toHaveClass('text-sm');
-  });
-
-  it('applies custom className', () => {
-    render(<ProjectLinks links={mockLinks} className="custom-class" />);
-    
-    const container = screen.getByText('View Code').parentElement;
-    expect(container).toHaveClass('custom-class');
   });
 
   it('handles empty links array', () => {

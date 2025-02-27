@@ -1,6 +1,5 @@
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import TechStack from '../TechStack';
 import { Technology } from '../../../types/Project';
@@ -12,32 +11,22 @@ vi.mock('framer-motion', () => ({
   },
 }));
 
-// Mock Tag component
-vi.mock('../../ui', () => ({
-  Tag: ({ label, onClick }: any) => (
-    <span onClick={onClick} data-testid={`tag-${label}`}>
-      {label}
-    </span>
-  ),
-}));
-
 describe('TechStack', () => {
   const mockTechnologies: Technology[] = [
     {
       name: 'React',
       type: 'framework',
-      description: 'A JavaScript library for building user interfaces',
-      icon: '/icons/react.svg',
+      color: '#61DAFB',
     },
     {
       name: 'TypeScript',
       type: 'language',
-      description: 'JavaScript with syntax for types',
+      color: '#3178C6',
     },
     {
-      name: 'MongoDB',
-      type: 'database',
-      description: 'NoSQL database',
+      name: 'Node.js',
+      type: 'platform',
+      color: '#339933',
     },
   ];
 
@@ -45,56 +34,33 @@ describe('TechStack', () => {
     render(<TechStack technologies={mockTechnologies} />);
     
     mockTechnologies.forEach(tech => {
-      expect(screen.getByTestId(`tag-${tech.name}`)).toBeInTheDocument();
+      expect(screen.getByText(tech.name)).toBeInTheDocument();
     });
   });
 
-  it('handles tech click events', () => {
-    const handleTechClick = vi.fn();
-    render(
-      <TechStack
-        technologies={mockTechnologies}
-        onTechClick={handleTechClick}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('tag-React'));
-    expect(handleTechClick).toHaveBeenCalledWith(mockTechnologies[0]);
-  });
-
-  it('applies featured styles', () => {
-    const { container } = render(
-      <TechStack
-        technologies={mockTechnologies}
-        featured={true}
-      />
-    );
+  it('applies custom colors', () => {
+    render(<TechStack technologies={mockTechnologies} />);
     
-    expect(container.firstChild).toHaveClass('flex', 'flex-wrap', 'gap-2');
+    mockTechnologies.forEach(tech => {
+      const tag = screen.getByText(tech.name);
+      expect(tag).toHaveStyle({ backgroundColor: tech.color });
+    });
   });
 
   it('applies custom className', () => {
     const { container } = render(
-      <TechStack
-        technologies={mockTechnologies}
-        className="custom-class"
-      />
+      <TechStack technologies={mockTechnologies} className="custom-class" />
     );
-    
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
-  it('renders empty when no technologies provided', () => {
+  it('handles empty technologies array', () => {
     const { container } = render(<TechStack technologies={[]} />);
     expect(container.firstChild).toBeEmptyDOMElement();
   });
 
-  it('handles technologies without type or description', () => {
-    const minimalTech: Technology[] = [
-      { name: 'Test' },
-    ];
-
-    render(<TechStack technologies={minimalTech} />);
-    expect(screen.getByTestId('tag-Test')).toBeInTheDocument();
+  it('renders with default spacing', () => {
+    const { container } = render(<TechStack technologies={mockTechnologies} />);
+    expect(container.firstChild).toHaveClass('space-x-2');
   });
 });

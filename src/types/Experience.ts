@@ -1,3 +1,5 @@
+import { ExperienceCategory } from './ExperienceCategory';
+
 /**
  * Represents a technology or tool used in a professional experience
  */
@@ -50,6 +52,8 @@ export interface ExperienceEntry {
   technologies: TechnologyUsed[];
   /** Optional highlight flag for featured experiences */
   featured?: boolean;
+  /** Category of the experience (e.g., Full-time, Contract, etc.) */
+  category: ExperienceCategory;
   /** Optional color theme for the timeline entry */
   theme?: {
     primary: string;

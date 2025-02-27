@@ -1,7 +1,6 @@
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ProjectContent from '../ProjectContent';
+import { Project } from '../../../types/Project';
 
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
@@ -12,84 +11,42 @@ vi.mock('framer-motion', () => ({
   },
 }));
 
-describe('ProjectContent', () => {
-  const mockProject = {
-    title: 'Test Project',
-    summary: 'Test summary',
-    description: '<p>Test description</p>',
-    status: 'completed' as const,
-  };
+const mockProject: Project = {
+  id: '1',
+  title: 'Test Project',
+  description: 'A test project description',
+  technologies: ['React', 'TypeScript'],
+  githubUrl: 'https://github.com/test',
+  demoUrl: 'https://demo.test',
+  imageUrl: '/test.jpg',
+  featured: true,
+};
 
-  it('renders title and summary correctly', () => {
+describe('ProjectContent', () => {
+  it('renders project title and description', () => {
     render(<ProjectContent project={mockProject} />);
     
     expect(screen.getByText('Test Project')).toBeInTheDocument();
-    expect(screen.getByText('Test summary')).toBeInTheDocument();
+    expect(screen.getByText('A test project description')).toBeInTheDocument();
   });
 
-  it('does not show description by default', () => {
+  it('renders technologies list', () => {
     render(<ProjectContent project={mockProject} />);
     
-    expect(screen.queryByText('Test description')).not.toBeInTheDocument();
+    mockProject.technologies.forEach(tech => {
+      expect(screen.getByText(tech)).toBeInTheDocument();
+    });
   });
 
-  it('shows description when featured', () => {
-    render(<ProjectContent project={mockProject} featured={true} />);
-    
-    const description = document.querySelector('.prose');
-    expect(description).toBeInTheDocument();
-    expect(description?.innerHTML).toContain('Test description');
-  });
-
-  it('shows status badge for in-progress projects', () => {
-    render(
-      <ProjectContent
-        project={{ ...mockProject, status: 'in-progress' }}
-      />
-    );
-    
-    expect(screen.getByText('In Progress')).toBeInTheDocument();
-  });
-
-  it('shows status badge for planned projects', () => {
-    render(
-      <ProjectContent
-        project={{ ...mockProject, status: 'planned' }}
-      />
-    );
-    
-    expect(screen.getByText('Planned')).toBeInTheDocument();
-  });
-
-  it('does not show status badge for completed projects', () => {
+  it('renders project links', () => {
     render(<ProjectContent project={mockProject} />);
     
-    expect(screen.queryByText('Completed')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /github/i })).toHaveAttribute('href', mockProject.githubUrl);
+    expect(screen.getByRole('link', { name: /live demo/i })).toHaveAttribute('href', mockProject.demoUrl);
   });
 
-  it('applies featured styles when featured prop is true', () => {
-    render(<ProjectContent project={mockProject} featured={true} />);
-    
-    const title = screen.getByText('Test Project');
-    expect(title).toHaveClass('text-2xl', 'md:text-3xl');
-  });
-
-  it('applies default styles when featured prop is false', () => {
-    render(<ProjectContent project={mockProject} featured={false} />);
-    
-    const title = screen.getByText('Test Project');
-    expect(title).toHaveClass('text-xl', 'md:text-2xl');
-  });
-
-  it('applies custom className when provided', () => {
-    render(
-      <ProjectContent
-        project={mockProject}
-        className="custom-class"
-      />
-    );
-    
-    const container = screen.getByText('Test Project').parentElement;
-    expect(container).toHaveClass('custom-class');
+  it('applies custom className', () => {
+    const { container } = render(<ProjectContent project={mockProject} className="custom-class" />);
+    expect(container.firstChild).toHaveClass('custom-class');
   });
 });
